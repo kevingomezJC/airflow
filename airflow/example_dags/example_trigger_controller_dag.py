@@ -22,19 +22,19 @@ Example usage of the TriggerDagRunOperator. This example holds 2 DAGs:
 2. 2nd DAG (example_trigger_target_dag) which will be triggered by the TriggerDagRunOperator in the 1st DAG
 """
 from airflow import DAG
-from airflow.operators.trigger_dagrun import TriggerDagRunOperator
+from airflow.sensors.external_task_sensor import ExternalTaskSensor
 from airflow.utils.dates import days_ago
 
 with DAG(
     dag_id="example_trigger_controller_dag",
     default_args={"owner": "airflow"},
-    start_date=days_ago(2),
+    start_date='2021-01-01',
+    catchup=False,
     schedule_interval="@once",
     tags=['example'],
 ) as dag:
 
-    trigger = TriggerDagRunOperator(
-        task_id="test_trigger_dagrun",
-        trigger_dag_id="example_trigger_target_dag",  # Ensure this equals the dag_id of the DAG to trigger
-        conf={"message": "Hello World"},
-    )
+    B1 = ExternalTaskSensor(task_id="B1",
+                            external_dag_id='core-kpis',
+                            external_task_id='lkhs-00007-gamebech-api',
+                            mode="reschedule")
